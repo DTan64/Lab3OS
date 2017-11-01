@@ -51,17 +51,12 @@ int main(int argc, char* argv[])
   requesterData.inputFileCounter = 0;
 
 
-
+  //initialize flags and threadCounter
   bool flag = true;
   requesterData.threadCounter = 0;
   requesterData.requesterCounter = requester;
   requesterData.flag = &flag;
   resolverData.flag = &flag;
-
-
-
-
-  //initialize resolver data
 
 
   //initialize mutexes
@@ -84,13 +79,7 @@ int main(int argc, char* argv[])
     requesterData.inputFiles[x] = argv[5 + x];
 
 
-
-
-
-
-
-
-
+  //open output files
   requesterData.servicedFile = fopen(argv[4], "a");
   if(requesterData.servicedFile == NULL)
   {
@@ -105,6 +94,7 @@ int main(int argc, char* argv[])
   }
 
 
+  //create threads
   for(i = 0; i < requester; i++)
   {
     pthread_create(&requestPtr[i], NULL, writeBuffer, structPtr1);
@@ -125,13 +115,11 @@ int main(int argc, char* argv[])
     pthread_join(resolverPtr[j], NULL);
   }
 
+
+  //close output files
   fclose(requesterData.servicedFile);
   fclose(resolverData.outputFile);
-
-
-
   printf("Done\n");
-
 
 
   return 0;
@@ -141,14 +129,15 @@ void* writeBuffer(struct requesterStruct* requesterData)
 {
 
   int numFiles = requesterData->numberOfFiles;
-  char name[100];
+  int numServiced = 0;
+  char name[1025];
   uint64_t tid;
   pthread_threadid_np(NULL, &tid);
   FILE* currentFile;
-  int numServiced = 0;
 
   while(requesterData->fileCounter < numFiles)
   {
+
     pthread_mutex_lock(&requesterData->inputFilesLock);
     if((requesterData->fileCounter + 1) > numFiles)
       break;
@@ -161,11 +150,8 @@ void* writeBuffer(struct requesterStruct* requesterData)
     while(!feof(currentFile))
     {
       pthread_mutex_lock(requesterData->sharedArrayLock);
-      printf("write has lock\n");
-      printf("counter is: %d\n", *requesterData->sharedArrayCounter);
       if(*requesterData->sharedArrayCounter < 15)
       {
-        printf("about to write\n");
         fscanf(currentFile, "%s", name);
         *requesterData->sharedArrayCounter += 1;
         requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter] = (char *)malloc(100);
@@ -175,27 +161,23 @@ void* writeBuffer(struct requesterStruct* requesterData)
       else
       {
         pthread_mutex_unlock(requesterData->sharedArrayLock);
-        printf("sleepingwrite\n");
         usleep(100000);
       }
     }
     fclose(currentFile);
     numServiced++;
   }
-  printf("about to write to service file\n");
+
+
   pthread_mutex_lock(&requesterData->servicedFileLock);
   fprintf(requesterData->servicedFile, "Thread %lld serviced %d file(s)\n", tid, numServiced);
   if((requesterData->threadCounter + 1) != requesterData->requesterCounter)
   {
-    printf("threadCounter: %d\n", requesterData->threadCounter);
     requesterData->threadCounter += 1;
-    printf("new threadCounter: %d\n", requesterData->threadCounter);
   }
   else
   {
-    printf("hit else: %d\n", requesterData->threadCounter);
     *requesterData->flag = false;
-    printf("flag: %d\n", *requesterData->flag);
   }
   pthread_mutex_unlock(&requesterData->servicedFileLock);
   pthread_exit(0);
@@ -213,11 +195,11 @@ void* readBuffer(struct resolverStruct* resolverData)
     pthread_mutex_lock(resolverData->sharedArrayLock);
     if(*resolverData->sharedArrayCounter >= 0)
     {
-      printf("about to read at %d\n", *resolverData->sharedArrayCounter);
       printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
-      printf("I read\n");
-      dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, 100);
-      fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, 100) == 0)
+        fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
+      else
+        fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
       printf("ip address: %s\n", ip);
       free(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
       *resolverData->sharedArrayCounter -= 1;
@@ -229,7 +211,5 @@ void* readBuffer(struct resolverStruct* resolverData)
       usleep(100000);
     }
   }
-
-
   pthread_exit(0);
 }

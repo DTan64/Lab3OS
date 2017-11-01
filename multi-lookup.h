@@ -1,6 +1,5 @@
 #ifndef MULTI_LOOKUP_H
 #define MULTI_LOOKUP_H
-
 #define ARRAYSIZE 15
 
 #include<stdio.h>
@@ -38,9 +37,6 @@ struct resolverStruct {
   bool* flag;
 
 };
-
-
-
 
 void* writeBuffer(struct requesterStruct* requesterData);
 void* readBuffer(struct resolverStruct* resolverData);
