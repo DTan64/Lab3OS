@@ -9,6 +9,8 @@
 #include<unistd.h>
 #include<semaphore.h>
 #include<stdbool.h>
+#include <time.h>
+#include <sys/time.h>
 
 struct requesterStruct {
 

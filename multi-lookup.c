@@ -65,6 +65,11 @@ int main(int argc, char* argv[])
   pthread_mutex_init(&requesterData.servicedFileLock, NULL);
 
 
+  //starting timer
+  struct timeval start, end;
+  gettimeofday(&start, NULL);
+
+
   //check if user input is correct
   if(argc < 6)
   {
@@ -119,7 +124,11 @@ int main(int argc, char* argv[])
   //close output files
   fclose(requesterData.servicedFile);
   fclose(resolverData.outputFile);
-  printf("Done\n");
+
+
+  //stop timer
+  gettimeofday(&end, NULL);
+  printf("Runtime: %ld\n", ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)));
 
 
   return 0;
