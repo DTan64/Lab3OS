@@ -45,6 +45,5 @@ struct resolverStruct {
 
 void* writeBuffer(struct requesterStruct* requesterData);
 void* readBuffer(struct resolverStruct* resolverData);
-void* functionC(char* prt);
 
 #endif
