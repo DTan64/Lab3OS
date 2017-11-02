@@ -163,6 +163,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
       {
         fscanf(currentFile, "%s", name);
         *requesterData->sharedArrayCounter += 1;
+        printf("requesterData: %d\n", *requesterData->sharedArrayCounter);
         requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter] = (char *)malloc(1025);
         strcpy(requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter], name);
         pthread_mutex_unlock(requesterData->sharedArrayLock);
@@ -197,7 +198,7 @@ void* readBuffer(struct resolverStruct* resolverData)
 {
 
   char name[1025];
-  char ip[100];
+  char ip[1025];
 
   while(*resolverData->flag && resolverData->sharedArrayCounter >= 0)
   {
@@ -205,13 +206,14 @@ void* readBuffer(struct resolverStruct* resolverData)
     if(*resolverData->sharedArrayCounter >= 0)
     {
       printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
-      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, 100) == 0)
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, 1025) == 0)
         fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
       else
         fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
       printf("ip address: %s\n", ip);
       free(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
       *resolverData->sharedArrayCounter -= 1;
+      printf("resolverData: %d\n", *resolverData->sharedArrayCounter);
       pthread_mutex_unlock(resolverData->sharedArrayLock);
     }
     else
