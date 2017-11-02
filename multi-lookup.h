@@ -32,7 +32,6 @@ struct requesterStruct {
 
 struct resolverStruct {
   pthread_mutex_t* sharedArrayLock;
-  pthread_mutex_t outputFileLock;
   int* sharedArrayCounter;
   char** sharedBufferPtr;
   FILE* outputFile;

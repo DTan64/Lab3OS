@@ -163,7 +163,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
       {
         fscanf(currentFile, "%s", name);
         *requesterData->sharedArrayCounter += 1;
-        requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter] = (char *)malloc(100);
+        requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter] = (char *)malloc(1025);
         strcpy(requesterData->sharedBufferPtr[*requesterData->sharedArrayCounter], name);
         pthread_mutex_unlock(requesterData->sharedArrayLock);
       }
