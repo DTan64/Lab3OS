@@ -1,5 +1,4 @@
 #include "multi-lookup.h"
-#include "util.h"
 #define ARRAYSIZE 15
 
 
@@ -139,8 +138,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
   int numFiles = requesterData->numberOfFiles;
   int numServiced = 0;
   char name[1025];
-  uint64_t tid;
-  pthread_threadid_np(NULL, &tid);
+  pid_t threadID = syscall(__NR_gettid);
   FILE* currentFile;
 
   while(requesterData->fileCounter < numFiles)
@@ -179,7 +177,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
 
 
   pthread_mutex_lock(&requesterData->servicedFileLock);
-  fprintf(requesterData->servicedFile, "Thread %lld serviced %d file(s)\n", tid, numServiced);
+  fprintf(requesterData->servicedFile, "Thread %u serviced %d file(s)\n", threadID, numServiced);
   if((requesterData->threadCounter + 1) != requesterData->requesterCounter)
   {
     requesterData->threadCounter += 1;
@@ -196,7 +194,6 @@ void* writeBuffer(struct requesterStruct* requesterData)
 void* readBuffer(struct resolverStruct* resolverData)
 {
 
-  char name[1025];
   char ip[INET6_ADDRSTRLEN];
 
   while(*resolverData->flag)

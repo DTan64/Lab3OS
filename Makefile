@@ -1,9 +1,16 @@
 CC=gcc
-CFLAGS= -lpthread -O2 -Wall -Wextra
+CFLAGS = -c -g -Wall -Wextra
+LFLAGS = -Wall -Wextra -pthread
 
-all:
-	gcc -o multi-lookup multi-lookup.c util.c
+.PHONY: all clean
+
+all: multi-lookup
+
+multi-lookup: multi-lookup.c multi-lookup.h
+	$(CC) $(LFLAGS) $^ -o $@
+
 clean:
-	rm result.txt
-	rm serviced.txt
-	rm multi-lookup
+	rm -f multi-lookup
+	rm -f *.o
+	rm -f *~
+	rm -f result.txt serviced.txt
