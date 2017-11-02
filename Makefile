@@ -6,4 +6,4 @@ all:
 clean:
 	rm result.txt
 	rm serviced.txt
-	rm multiThread
+	rm multi-lookup

@@ -199,7 +199,7 @@ void* readBuffer(struct resolverStruct* resolverData)
   char name[100];
   char ip[100];
 
-  while(*resolverData->flag)
+  while(*resolverData->flag && resolverData->sharedArrayCounter >= 0)
   {
     pthread_mutex_lock(resolverData->sharedArrayLock);
     if(*resolverData->sharedArrayCounter >= 0)
