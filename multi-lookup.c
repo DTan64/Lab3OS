@@ -8,7 +8,6 @@ int main(int argc, char* argv[])
 
   //local declarations
   char* tmp;
-  char buffer[100];
   char* sharedArray[ARRAYSIZE];
   int counter = -1;
   int i = 0;
@@ -102,12 +101,12 @@ int main(int argc, char* argv[])
   //create threads
   for(i = 0; i < requester; i++)
   {
-    pthread_create(&requestPtr[i], NULL, writeBuffer, structPtr1);
+    pthread_create(&requestPtr[i], NULL, (void *)writeBuffer, structPtr1);
   }
 
   for(j = 0; j < resolver; j++)
   {
-    pthread_create(&resolverPtr[j], NULL, readBuffer, structPtr2);
+    pthread_create(&resolverPtr[j], NULL, (void *)readBuffer, structPtr2);
   }
 
   for(i = 0; i < requester; i++)
@@ -159,7 +158,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
     while(!feof(currentFile))
     {
       pthread_mutex_lock(requesterData->sharedArrayLock);
-      if(*requesterData->sharedArrayCounter < 15)
+      if(*requesterData->sharedArrayCounter <= 14)
       {
         fscanf(currentFile, "%s", name);
         *requesterData->sharedArrayCounter += 1;
@@ -198,15 +197,15 @@ void* readBuffer(struct resolverStruct* resolverData)
 {
 
   char name[1025];
-  char ip[1025];
+  char ip[INET6_ADDRSTRLEN];
 
-  while(*resolverData->flag && resolverData->sharedArrayCounter >= 0)
+  while(*resolverData->flag)
   {
     pthread_mutex_lock(resolverData->sharedArrayLock);
     if(*resolverData->sharedArrayCounter >= 0)
     {
       printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
-      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, 1025) == 0)
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) == UTIL_FAILURE)
         fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
       else
         fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
@@ -222,5 +221,25 @@ void* readBuffer(struct resolverStruct* resolverData)
       usleep(100000);
     }
   }
+
+  pthread_mutex_lock(resolverData->sharedArrayLock);
+  if(*resolverData->sharedArrayCounter >= 0)
+  {
+    for(int i = 0; i < *resolverData->sharedArrayCounter; i++)
+    {
+      printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) == UTIL_FAILURE)
+        fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
+      else
+        fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
+      printf("ip address: %s\n", ip);
+      free(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
+      *resolverData->sharedArrayCounter -= 1;
+      printf("resolverData: %d\n", *resolverData->sharedArrayCounter);
+    }
+    pthread_mutex_unlock(resolverData->sharedArrayLock);
+  }
+  else
+    pthread_mutex_unlock(resolverData->sharedArrayLock);
   pthread_exit(0);
 }
