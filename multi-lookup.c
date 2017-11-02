@@ -196,6 +196,7 @@ void* readBuffer(struct resolverStruct* resolverData)
 
   char ip[INET6_ADDRSTRLEN];
 
+  
   while(*resolverData->flag)
   {
     pthread_mutex_lock(resolverData->sharedArrayLock);
@@ -218,7 +219,8 @@ void* readBuffer(struct resolverStruct* resolverData)
       usleep(100000);
     }
   }
-
+  
+  
   pthread_mutex_lock(resolverData->sharedArrayLock);
   if(*resolverData->sharedArrayCounter >= 0)
   {
