@@ -196,7 +196,7 @@ void* writeBuffer(struct requesterStruct* requesterData)
 void* readBuffer(struct resolverStruct* resolverData)
 {
 
-  char name[100];
+  char name[1025];
   char ip[100];
 
   while(*resolverData->flag && resolverData->sharedArrayCounter >= 0)
