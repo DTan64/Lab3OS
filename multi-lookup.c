@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 
   //stop timer
   gettimeofday(&end, NULL);
-  printf("Runtime: %ld\n", ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec)));
+  printf("Runtime: %ld seconds\n", (end.tv_sec - start.tv_sec));
 
 
   return 0;
