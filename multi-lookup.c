@@ -203,7 +203,7 @@ void* readBuffer(struct resolverStruct* resolverData)
     if(*resolverData->sharedArrayCounter >= 0)
     {
       printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
-      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) == UTIL_FAILURE)
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) != UTIL_FAILURE)
         fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
       else
         fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
@@ -227,7 +227,7 @@ void* readBuffer(struct resolverStruct* resolverData)
     for(int i = 0; i < *resolverData->sharedArrayCounter; i++)
     {
       printf("name: %s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
-      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) == UTIL_FAILURE)
+      if(dnslookup(resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip, sizeof(ip)) != UTIL_FAILURE)
         fprintf(resolverData->outputFile, "%s,%s\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter], ip);
       else
         fprintf(resolverData->outputFile, "%s,\n", resolverData->sharedBufferPtr[*resolverData->sharedArrayCounter]);
